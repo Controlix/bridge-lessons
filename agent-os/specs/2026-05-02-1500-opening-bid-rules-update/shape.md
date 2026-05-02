@@ -15,6 +15,7 @@ New Rules:
 - Update `OpeningBidEvaluator.php` logic to check for longest suit or highest ranking suit when there are multiple 5+ card suits.
 - Update logic to handle multiple 4-card minor suits (bid lowest).
 - Ensure a hand with 4 Diamonds and 5 Clubs returns 1 Club.
+- **UI Requirement:** When hands are displayed to the user (in examples and exercises), they must be sorted. Sorting must be by suit first (Spades > Hearts > Diamonds > Clubs) and then by face value descending (A, K, Q, J, 10...2).
 
 ## Context
 

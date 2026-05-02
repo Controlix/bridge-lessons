@@ -10,5 +10,8 @@ Modify `tests/Unit/OpeningBidEvaluatorTest.php` for the new edge cases:
 ## Task 3: Implement Rule Update
 Modify `app/Services/OpeningBidEvaluator.php` to enforce the new prioritization logic.
 
-## Task 4: Verification
+## Task 4: Update UI and Sort Cards
+Modify `resources/views/lessons/opening-bid-level-1.blade.php` to match the exact rules in the UI text, align the JavaScript logic with the PHP logic, ensure `generateExplanation` matches the new rules, and implement a `sortHand` algorithm to sort hands visually (S > H > D > C, then A > K...).
+
+## Task 5: Verification
 Run `vendor/bin/pest` to verify all tests pass.
