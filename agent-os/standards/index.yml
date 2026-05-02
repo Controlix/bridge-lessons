@@ -1,2 +1,6 @@
 # Agent OS Standards Index
-
+views:
+  color-palette:
+    description: Use standard Tailwind CSS color classes instead of arbitrary hex codes
+  lesson-routing:
+    description: Lesson views map 1:1 with URL slugs without using a database

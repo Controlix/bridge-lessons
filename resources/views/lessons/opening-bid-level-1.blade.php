@@ -24,10 +24,10 @@
         <ol class="list-decimal pl-5 mb-8 text-[#706f6c] dark:text-[#A1A09A] space-y-3">
             <li><strong>Pass:</strong> If you have less than 12 HCP.</li>
             <li><strong>1SA (1 No Trump):</strong> If you have 15-17 HCP <em>and</em> a balanced hand. A balanced hand means your card distribution is 4-3-3-3, 4-4-3-2, or 5-3-3-2.</li>
-            <li><strong>1 Spade:</strong> If you have 5 or more Spades.</li>
-            <li><strong>1 Heart:</strong> If you have 5 or more Hearts.</li>
-            <li><strong>1 Diamond:</strong> If you have 4 or more Diamonds.</li>
-            <li><strong>1 Club:</strong> If none of the above apply (you don't have a 5-card major, and you don't have 4 diamonds).</li>
+            <li><strong>5+ Card Suits:</strong> If you have one or more suits with 5+ cards, bid your <strong>highest ranking</strong> 5+ card suit. (Spades > Hearts > Diamonds > Clubs)</li>
+            <li><strong>Multiple 4-Card Minors:</strong> If you do not have a 5-card major, and you have both 4 Diamonds and 4 Clubs, bid the <strong>lowest ranking</strong> suit: 1 Club.</li>
+            <li><strong>1 Diamond:</strong> If you do not have a 5-card major, but you have exactly 4 Diamonds (and less than 4 Clubs).</li>
+            <li><strong>1 Club:</strong> If none of the above apply.</li>
         </ol>
 
         <h2 class="text-xl font-medium mt-8 mb-4 border-b border-[#e3e3e0] dark:border-[#3E3E3A] pb-2">Examples</h2>
@@ -102,6 +102,21 @@
         <script>
             // The OpeningBidEvaluator logic re-implemented in JS for the frontend
             const HCP_VALUES = { 'A': 4, 'K': 3, 'Q': 2, 'J': 1 };
+            const suitOrder = { 'S': 4, 'H': 3, 'D': 2, 'C': 1 };
+            const rankOrder = { 'A': 14, 'K': 13, 'Q': 12, 'J': 11, '10': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2 };
+
+            function sortHand(hand) {
+                return hand.slice().sort((a, b) => {
+                    const suitA = a[a.length - 1];
+                    const suitB = b[b.length - 1];
+                    if (suitOrder[suitA] !== suitOrder[suitB]) {
+                        return suitOrder[suitB] - suitOrder[suitA];
+                    }
+                    const rankA = a.substring(0, a.length - 1);
+                    const rankB = b.substring(0, b.length - 1);
+                    return rankOrder[rankB] - rankOrder[rankA];
+                });
+            }
             
             function calculateHcp(hand) {
                 return hand.reduce((total, card) => {
@@ -133,8 +148,23 @@
 
                 if (hcp < 12) return 'Pass';
                 if (hcp >= 15 && hcp <= 17 && isBalanced(dist)) return '1SA';
-                if (dist['S'] >= 5) return '1 Spade';
-                if (dist['H'] >= 5) return '1 Heart';
+                
+                // Check for 5+ card suits
+                const suits = ['S', 'H', 'D', 'C'];
+                const fiveCardSuits = [];
+                for (const suit of suits) {
+                    if (dist[suit] >= 5) {
+                        fiveCardSuits.push(suit);
+                    }
+                }
+
+                if (fiveCardSuits.length > 0) {
+                    const suitMap = { 'S': 'Spade', 'H': 'Heart', 'D': 'Diamond', 'C': 'Club' };
+                    // suits are ordered highest to lowest ranking, so first is highest
+                    return '1 ' + suitMap[fiveCardSuits[0]];
+                }
+
+                if (dist['D'] >= 4 && dist['C'] >= 4) return '1 Club';
                 if (dist['D'] >= 4) return '1 Diamond';
                 return '1 Club';
             }
@@ -216,7 +246,8 @@
             }
 
             function renderExample(example) {
-                let cardsHtml = example.hand.map(renderCard).join('');
+                const sortedHand = sortHand(example.hand);
+                let cardsHtml = sortedHand.map(renderCard).join('');
                 return `
                     <div class="bg-[#f8f9fa] dark:bg-[#111110] rounded-lg border border-[#e3e3e0] dark:border-[#3E3E3A] p-6">
                         <h3 class="font-medium mb-4">${example.title}</h3>
@@ -240,7 +271,8 @@
                 const correctBid = evaluateBid(exercise.hand);
                 const options = ['Pass', '1SA', '1 Spade', '1 Heart', '1 Diamond', '1 Club'];
                 
-                let cardsHtml = exercise.hand.map(renderCard).join('');
+                const sortedHand = sortHand(exercise.hand);
+                let cardsHtml = sortedHand.map(renderCard).join('');
                 
                 let optionsHtml = options.map(opt => `
                     <button onclick="checkAnswer(${exercise.id}, '${opt}', '${correctBid}')" 
@@ -323,14 +355,28 @@
                     explanation += "With less than 12 HCP, you must Pass.";
                 } else if (hcp >= 15 && hcp <= 17 && isBalanced(dist)) {
                     explanation += "With 15-17 HCP and a balanced hand, the 1SA rule takes precedence.";
-                } else if (dist['S'] >= 5) {
-                    explanation += "With 12+ HCP, not 15-17 balanced, and 5+ Spades, you open 1 Spade.";
-                } else if (dist['H'] >= 5) {
-                    explanation += "With 12+ HCP, not 15-17 balanced, and 5+ Hearts, you open 1 Heart.";
-                } else if (dist['D'] >= 4) {
-                    explanation += "With 12+ HCP, no 5-card major, and 4+ Diamonds, you open 1 Diamond.";
                 } else {
-                    explanation += "With 12+ HCP, no 5-card major, and less than 4 Diamonds, you open 1 Club.";
+                    const suits = ['S', 'H', 'D', 'C'];
+                    const fiveCardSuits = [];
+                    for (const suit of suits) {
+                        if (dist[suit] >= 5) {
+                            fiveCardSuits.push(suit);
+                        }
+                    }
+
+                    if (fiveCardSuits.length > 0) {
+                        if (fiveCardSuits.length > 1) {
+                            explanation += "When you have multiple 5+ card suits, you open the highest ranking suit.";
+                        } else {
+                            explanation += `With 12+ HCP, not 15-17 balanced, and a 5+ card suit, you open that suit.`;
+                        }
+                    } else if (dist['D'] >= 4 && dist['C'] >= 4) {
+                        explanation += "With 12+ HCP, no 5-card major, and multiple 4-card minor suits, you open the lowest ranking suit (Club).";
+                    } else if (dist['D'] >= 4) {
+                        explanation += "With 12+ HCP, no 5-card major, and 4+ Diamonds, you open 1 Diamond.";
+                    } else {
+                        explanation += "With 12+ HCP, no 5-card major, and less than 4 Diamonds, you open 1 Club.";
+                    }
                 }
                 
                 return explanation;

@@ -56,6 +56,36 @@ it('recommends 1 Heart for hands with 5+ hearts (not 15-17 balanced and <5 spade
     expect($evaluator->evaluate($hand2))->toBe('1 Heart');
 });
 
+it('recommends highest ranking suit when there are two 5+ card suits', function () {
+    $evaluator = new OpeningBidEvaluator();
+    
+    // 5 Spades, 6 Hearts. AS(4) AH(4) AD(4) = 12 HCP. Spades: 5, Hearts: 6.
+    // Highest ranking is Spades.
+    $hand1 = makeHand('AS 2S 3S 4S 5S AH 2H 3H 4H 5H 6H AD 2C');
+    expect($evaluator->evaluate($hand1))->toBe('1 Spade');
+
+    // 5 Hearts, 5 Diamonds. AH(4) KH(3) AD(4) KD(3) = 14 HCP. Hearts: 5, Diamonds: 5.
+    // Highest ranking is Hearts.
+    $hand2 = makeHand('2S 3S 4S AH KH 2H 3H 4H AD KD 2D 3D 4D');
+    expect($evaluator->evaluate($hand2))->toBe('1 Heart');
+});
+
+it('recommends 1 Club when there are two 4-card minor suits', function () {
+    $evaluator = new OpeningBidEvaluator();
+    
+    // 4 Spades, 1 Heart, 4 Diamonds, 4 Clubs. AS(4) AD(4) AC(4) = 12 HCP.
+    $hand1 = makeHand('AS 2S 3S 4S 2H AD 2D 3D 4D AC 2C 3C 4C');
+    expect($evaluator->evaluate($hand1))->toBe('1 Club');
+});
+
+it('recommends 1 Club when hand has 4 Diamonds and 5 Clubs (and no 5-card major)', function () {
+    $evaluator = new OpeningBidEvaluator();
+    
+    // 2 Spades, 2 Hearts, 4 Diamonds, 5 Clubs. AS(4) AD(4) AC(4) = 12 HCP.
+    $hand1 = makeHand('AS 2S 2H 3H AD 2D 3D 4D AC 2C 3C 4C 5C');
+    expect($evaluator->evaluate($hand1))->toBe('1 Club');
+});
+
 it('recommends 1 Diamond for hands with 4+ diamonds (when no 5-card major or 1SA applies)', function () {
     $evaluator = new OpeningBidEvaluator();
     

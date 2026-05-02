@@ -26,12 +26,26 @@ class OpeningBidEvaluator
             return '1SA';
         }
 
-        if ($distribution['S'] >= 5) {
-            return '1 Spade';
+        // Check for 5+ card suits
+        $fiveCardSuits = [];
+        foreach (self::SUITS as $suit) {
+            if ($distribution[$suit] >= 5) {
+                $fiveCardSuits[] = $suit;
+            }
         }
 
-        if ($distribution['H'] >= 5) {
-            return '1 Heart';
+        if (count($fiveCardSuits) > 0) {
+            // self::SUITS is ordered S, H, D, C (highest to lowest ranking).
+            // Therefore, the first one found is automatically the highest ranking.
+            return '1 ' . $this->suitName($fiveCardSuits[0]);
+        }
+
+        // At this point, there are no 5-card suits.
+        // We cannot bid a major. We must bid a minor.
+        
+        if ($distribution['D'] >= 4 && $distribution['C'] >= 4) {
+            // 2 or more 4-cards. Bid lowest.
+            return '1 Club';
         }
 
         if ($distribution['D'] >= 4) {
@@ -39,6 +53,16 @@ class OpeningBidEvaluator
         }
 
         return '1 Club';
+    }
+
+    private function suitName(string $suitChar): string
+    {
+        return match ($suitChar) {
+            'S' => 'Spade',
+            'H' => 'Heart',
+            'D' => 'Diamond',
+            'C' => 'Club',
+        };
     }
 
     private function calculateHcp(array $hand): int
