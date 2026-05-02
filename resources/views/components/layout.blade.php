@@ -19,9 +19,37 @@
         
         <!-- Script stack for page specific JS -->
         @stack('scripts')
+        <style>
+            body {
+                background-color: #e2e8f0;
+                background-image: url('https://images.unsplash.com/photo-1541278107931-e006523892df?q=80&w=2000&auto=format&fit=crop');
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+            }
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.4); /* Transparent on the sides */
+                backdrop-filter: blur(2px); 
+                -webkit-backdrop-filter: blur(2px);
+                z-index: -1;
+            }
+            .content-wrapper {
+                position: relative;
+                z-index: 10;
+                background-color: rgba(255, 255, 255, 0.95) !important; /* Highly opaque center */
+                box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            }
+        </style>
     </head>
-    <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex flex-col min-h-screen">
-        <header class="w-full max-w-4xl mx-auto px-6 lg:px-8 py-6">
+    <body class="text-[#1b1b18] flex flex-col min-h-screen relative">
+        <div class="overlay"></div>
+        <div class="content-wrapper flex flex-col min-h-screen w-full max-w-5xl mx-auto sm:border-x border-[#e3e3e0]/50 shadow-2xl bg-white/95">
+            <header class="w-full max-w-4xl mx-auto px-6 lg:px-8 py-6">
             <nav class="flex items-center justify-between">
                 <a href="/" class="font-medium text-lg text-[#1b1b18] dark:text-[#EDEDEC]">Bridge Lessons</a>
                 <div class="flex items-center gap-6">
@@ -36,8 +64,9 @@
             {{ $slot }}
         </main>
 
-        <footer class="w-full max-w-4xl mx-auto px-6 lg:px-8 py-6 border-t border-[#e3e3e0] dark:border-[#3E3E3A]">
-            <p class="text-sm text-[#706f6c] dark:text-[#A1A09A] text-center">Bridge Lessons &copy; {{ date('Y') }}</p>
-        </footer>
+            <footer class="w-full max-w-4xl mx-auto px-6 lg:px-8 py-6 border-t border-[#e3e3e0]/50 dark:border-[#3E3E3A]/50">
+                <p class="text-sm text-[#706f6c] dark:text-[#A1A09A] text-center">Bridge Lessons &copy; {{ date('Y') }}</p>
+            </footer>
+        </div>
     </body>
 </html>

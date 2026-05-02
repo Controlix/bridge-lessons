@@ -25,4 +25,3 @@ Route::get('/lessons/{slug}', function ($slug) {
     // Fallback if specific view doesn't exist yet
     abort(404, "Lesson view not found.");
 })->name('lesson.show');
-
