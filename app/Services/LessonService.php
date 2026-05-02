@@ -8,6 +8,11 @@ class LessonService
     {
         return [
             [
+                'title' => 'Opening bid on level 1',
+                'description' => 'Learn the rules for opening the bidding with 12-19 HCP using Berry\'s 5-card major system.',
+                'slug' => 'opening-bid-level-1',
+            ],
+            [
                 'title' => 'Bidding Basics',
                 'description' => 'Learn the fundamentals of bidding and how to open the auction.',
                 'slug' => 'bidding-basics',
