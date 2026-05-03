@@ -24,10 +24,10 @@
         <ol class="list-decimal pl-5 mb-8 text-[#706f6c] dark:text-[#A1A09A] space-y-3">
             <li><strong>Pass:</strong> If you have less than 12 HCP.</li>
             <li><strong>1SA (1 No Trump):</strong> If you have 15-17 HCP <em>and</em> a balanced hand. A balanced hand means your card distribution is 4-3-3-3, 4-4-3-2, or 5-3-3-2.</li>
-            <li><strong>5+ Card Suits:</strong> If you have one or more suits with 5+ cards, bid your <strong>highest ranking</strong> 5+ card suit. (Spades > Hearts > Diamonds > Clubs)</li>
-            <li><strong>Multiple 4-Card Minors:</strong> If you do not have a 5-card major, and you have both 4 Diamonds and 4 Clubs, bid the <strong>lowest ranking</strong> suit: 1 Club.</li>
-            <li><strong>1 Diamond:</strong> If you do not have a 5-card major, but you have exactly 4 Diamonds (and less than 4 Clubs).</li>
-            <li><strong>1 Club:</strong> If none of the above apply.</li>
+            <li><strong>5+ Card Suits:</strong> If you have one or more suits with 5+ cards, bid your <strong>highest ranking</strong> 5+ card suit. (<x-suit type="S"/> &gt; <x-suit type="H"/> &gt; <x-suit type="D"/> &gt; <x-suit type="C"/>)</li>
+            <li><strong>Multiple 4-Card Minors:</strong> If you do not have a 5-card major, and you have both 4 <x-suit type="D"/> and 4 <x-suit type="C"/>, bid the <strong>lowest ranking</strong> suit: 1 <x-suit type="C"/>.</li>
+            <li><strong>1 <x-suit type="D"/>:</strong> If you do not have a 5-card major, but you have exactly 4 <x-suit type="D"/> (and less than 4 <x-suit type="C"/>).</li>
+            <li><strong>1 <x-suit type="C"/>:</strong> If none of the above apply.</li>
         </ol>
 
         <h2 class="text-xl font-medium mt-8 mb-4 border-b border-[#e3e3e0] dark:border-[#3E3E3A] pb-2">Examples</h2>
@@ -76,6 +76,7 @@
                 color: #991b1b !important;
                 border-color: #fecaca !important;
             }
+
             @media (prefers-color-scheme: dark) {
                 .btn-correct {
                     background-color: rgba(20, 83, 45, 0.5) !important;
@@ -169,13 +170,42 @@
                 return '1 Club';
             }
 
+            const suitSymbols = { 'S': '&spades;', 'H': '&hearts;', 'D': '&diams;', 'C': '&clubs;' };
+            const suitColors = { 
+                'S': 'suit-s', 
+                'H': 'suit-h', 
+                'D': 'suit-d', 
+                'C': 'suit-c' 
+            };
+
+            function renderCard(cardString) {
+                const rank = cardString.substring(0, cardString.length - 1);
+                const suit = cardString[cardString.length - 1];
+                return `<span class="inline-flex items-center px-2 py-1 bg-white dark:bg-[#2a2a28] border border-[#e3e3e0] dark:border-[#3E3E3A] rounded shadow-sm text-lg font-medium mr-1 gap-0.5"><span class="text-[#1b1b18] dark:text-[#EDEDEC]">${rank}</span><span class="${suitColors[suit]}">${suitSymbols[suit]}</span></span>`;
+            }
+
+            function renderSuit(suit) {
+                return `<span class="${suitColors[suit]} font-bold">${suitSymbols[suit]}</span>`;
+            }
+
+            function renderBid(bid) {
+                if (bid === 'Pass' || bid === '1SA') return bid;
+                const parts = bid.split(' ');
+                if (parts.length === 2) {
+                    const suitMap = { 'Spade': 'S', 'Heart': 'H', 'Diamond': 'D', 'Club': 'C' };
+                    const suit = suitMap[parts[1]] || parts[1][0]; // Handle "1 Spade" or "1 S"
+                    return `${parts[0]} ${renderSuit(suit)}`;
+                }
+                return bid;
+            }
+
             // Examples Data
             const examplesData = [
                 {
                     title: "Example 1: Not enough points",
                     hand: ['AS', '3S', '2S', 'KH', '5H', '4H', 'QD', '9D', '8D', 'JC', '7C', '6C', '5C'],
                     hcp: "4 (♠) + 3 (♥) + 2 (♦) + 1 (♣) = 10",
-                    distribution: "3 Spades, 3 Hearts, 3 Diamonds, 4 Clubs",
+                    distribution: `3 ${renderSuit('S')}, 3 ${renderSuit('H')}, 3 ${renderSuit('D')}, 4 ${renderSuit('C')}`,
                     reasoning: "We only have 10 High Card Points. Since we need at least 12 HCP to open the bidding, we must Pass.",
                     bid: "Pass"
                 },
@@ -183,7 +213,7 @@
                     title: "Example 2: Balanced hand with 15-17 HCP",
                     hand: ['AS', 'KS', '3S', 'QH', 'JH', '4H', 'AD', '5D', '2D', 'KC', '8C', '7C', '6C'],
                     hcp: "7 (♠) + 3 (♥) + 4 (♦) + 3 (♣) = 17",
-                    distribution: "3 Spades, 3 Hearts, 3 Diamonds, 4 Clubs (4-3-3-3 balanced)",
+                    distribution: `3 ${renderSuit('S')}, 3 ${renderSuit('H')}, 3 ${renderSuit('D')}, 4 ${renderSuit('C')} (4-3-3-3 balanced)`,
                     reasoning: "We have exactly 17 HCP and a balanced distribution (4-3-3-3). The first rule that applies is the 1SA rule.",
                     bid: "1SA"
                 },
@@ -191,8 +221,8 @@
                     title: "Example 3: 5-Card Major",
                     hand: ['KS', '4S', 'AH', 'QH', '8H', '5H', '3H', 'KD', '4D', '2D', '9C', '3C', '2C'],
                     hcp: "3 (♠) + 6 (♥) + 3 (♦) + 0 (♣) = 12",
-                    distribution: "2 Spades, 5 Hearts, 3 Diamonds, 3 Clubs",
-                    reasoning: "We have 12 HCP, which is enough to open. We do not have 15-17 HCP balanced. The next rule is to check for a 5-card major. We have 5 Hearts, so we bid 1 Heart.",
+                    distribution: `2 ${renderSuit('S')}, 5 ${renderSuit('H')}, 3 ${renderSuit('D')}, 3 ${renderSuit('C')}`,
+                    reasoning: `We have 12 HCP, which is enough to open. We do not have 15-17 HCP balanced. The next rule is to check for a 5-card major. We have 5 ${renderSuit('H')}, so we bid 1 ${renderSuit('H')}.`,
                     bid: "1 Heart"
                 }
             ];
@@ -202,48 +232,34 @@
                 {
                     id: 1,
                     hand: ['AS', 'KS', '3S', '4S', 'AH', '2H', '3H', '4D', '5D', '6D', '2C', '3C', '4C'],
-                    explanation: "This hand has 11 HCP (Spades: 4+3=7, Hearts: 4). Since it's less than 12 HCP, you must Pass."
+                    explanation: `This hand has 11 HCP (${renderSuit('S')}: 4+3=7, ${renderSuit('H')}: 4). Since it's less than 12 HCP, you must Pass.`
                 },
                 {
                     id: 2,
                     hand: ['AS', 'KS', 'QS', '2S', '3S', 'AH', 'KH', '2H', '2D', '3D', '4D', 'JC', '2C'],
-                    explanation: "This hand has 17 HCP and a 5-3-3-2 distribution (balanced). Even though there are 5 Spades, the 1SA rule (15-17 balanced) takes precedence."
+                    explanation: `This hand has 17 HCP and a 5-3-3-2 distribution (balanced). Even though there are 5 ${renderSuit('S')}, the 1SA rule (15-17 balanced) takes precedence.`
                 },
                 {
                     id: 3,
                     hand: ['AS', '2S', '3S', '4S', '5S', 'AH', '2H', '3H', 'AD', '2D', '3D', '2C', '3C'],
-                    explanation: "This hand has 12 HCP and 5 Spades. It's not 15-17 balanced, so you open 1 Spade."
+                    explanation: `This hand has 12 HCP and 5 ${renderSuit('S')}. It's not 15-17 balanced, so you open 1 ${renderSuit('S')}.`
                 },
                 {
                     id: 4,
                     hand: ['AS', '2S', '3S', 'AH', '2H', '3H', '4H', '5H', 'AD', '2D', '3D', '2C', '3C'],
-                    explanation: "This hand has 12 HCP, 3 Spades, and 5 Hearts. You open 1 Heart."
+                    explanation: `This hand has 12 HCP, 3 ${renderSuit('S')}, and 5 ${renderSuit('H')}. You open 1 ${renderSuit('H')}.`
                 },
                 {
                     id: 5,
                     hand: ['AS', '2S', '3S', 'AH', '2H', '3H', 'AD', '2D', '3D', '4D', '2C', '3C', '4C'],
-                    explanation: "This hand has 12 HCP. No 5-card major, but you have 4 Diamonds. Open 1 Diamond."
+                    explanation: `This hand has 12 HCP. No 5-card major, but you have 4 ${renderSuit('D')}. Open 1 ${renderSuit('D')}.`
                 },
                 {
                     id: 6,
                     hand: ['AS', '2S', '3S', '4S', 'AH', '2H', '3H', '4H', 'AD', '2D', '3D', 'QC', '2C'],
-                    explanation: "This hand has 14 HCP. No 5-card major, and only 3 Diamonds. Open 1 Club."
+                    explanation: `This hand has 14 HCP. No 5-card major, and only 3 ${renderSuit('D')}. Open 1 ${renderSuit('C')}.`
                 }
             ];
-
-            const suitSymbols = { 'S': '&spades;', 'H': '&hearts;', 'D': '&diams;', 'C': '&clubs;' };
-            const suitColors = { 
-                'S': '', 
-                'H': 'color: #ef4444;', 
-                'D': 'color: #ef4444;', 
-                'C': '' 
-            };
-
-            function renderCard(cardString) {
-                const rank = cardString.substring(0, cardString.length - 1);
-                const suit = cardString[cardString.length - 1];
-                return `<span class="inline-block px-2 py-1 bg-white dark:bg-[#2a2a28] border border-[#e3e3e0] dark:border-[#3E3E3A] rounded shadow-sm text-lg font-medium mr-1" style="${suitColors[suit]}">${rank}${suitSymbols[suit]}</span>`;
-            }
 
             function renderExample(example) {
                 const sortedHand = sortHand(example.hand);
@@ -261,7 +277,7 @@
                         </ul>
                         <div class="text-sm font-medium flex items-center gap-2">
                             <span class="text-[#1b1b18] dark:text-[#EDEDEC]">Correct Bid:</span> 
-                            <span class="px-3 py-1 bg-[#dcfce7] text-[#166534] border border-[#bbf7d0] dark:bg-green-900/30 dark:text-[#bbf7d0] dark:border-[#14532d] rounded">${example.bid}</span>
+                            <span class="px-3 py-1 bg-[#dcfce7] text-[#166534] border border-[#bbf7d0] dark:bg-green-900/30 dark:text-[#bbf7d0] dark:border-[#14532d] rounded">${renderBid(example.bid)}</span>
                         </div>
                     </div>
                 `;
@@ -278,7 +294,7 @@
                     <button onclick="checkAnswer(${exercise.id}, '${opt}', '${correctBid}')" 
                             id="btn-${exercise.id}-${opt.replace(' ', '-')}"
                             class="px-4 py-2 bg-[#f5f5f5] dark:bg-[#161615] border border-[#e3e3e0] dark:border-[#3E3E3A] rounded hover:bg-[#ebebeb] dark:hover:bg-[#2a2a28] transition-colors text-sm font-medium">
-                        ${opt}
+                        ${renderBid(opt)}
                     </button>
                 `).join('');
 
@@ -321,7 +337,7 @@
                     selectedBtn.classList.add('btn-incorrect');
                     correctBtn.classList.add('btn-correct');
                     feedbackEl.className = "p-4 rounded-md mt-4 text-sm border feedback-incorrect";
-                    feedbackEl.innerHTML = `<strong>Incorrect.</strong> The correct bid is <strong>${correctBid}</strong>. <br><br>${exercise.explanation}`;
+                    feedbackEl.innerHTML = `<strong>Incorrect.</strong> The correct bid is <strong>${renderBid(correctBid)}</strong>. <br><br>${exercise.explanation}`;
                 }
                 
                 feedbackEl.classList.remove('hidden');
@@ -349,7 +365,7 @@
                 const hcp = calculateHcp(hand);
                 const dist = calculateDistribution(hand);
                 
-                let explanation = `This hand has ${hcp} HCP and a distribution of ${dist['S']} Spades, ${dist['H']} Hearts, ${dist['D']} Diamonds, and ${dist['C']} Clubs. `;
+                let explanation = `This hand has ${hcp} HCP and a distribution of ${dist['S']} ${renderSuit('S')}, ${dist['H']} ${renderSuit('H')}, ${dist['D']} ${renderSuit('D')}, and ${dist['C']} ${renderSuit('C')}. `;
                 
                 if (hcp < 12) {
                     explanation += "With less than 12 HCP, you must Pass.";
@@ -366,16 +382,16 @@
 
                     if (fiveCardSuits.length > 0) {
                         if (fiveCardSuits.length > 1) {
-                            explanation += "When you have multiple 5+ card suits, you open the highest ranking suit.";
+                            explanation += `When you have multiple 5+ card suits, you open the highest ranking suit (${renderSuit(fiveCardSuits[0])}).`;
                         } else {
-                            explanation += `With 12+ HCP, not 15-17 balanced, and a 5+ card suit, you open that suit.`;
+                            explanation += `With 12+ HCP, not 15-17 balanced, and a 5+ card suit, you open that suit (${renderSuit(fiveCardSuits[0])}).`;
                         }
                     } else if (dist['D'] >= 4 && dist['C'] >= 4) {
-                        explanation += "With 12+ HCP, no 5-card major, and multiple 4-card minor suits, you open the lowest ranking suit (Club).";
+                        explanation += `With 12+ HCP, no 5-card major, and multiple 4-card minor suits, you open the lowest ranking suit (1 ${renderSuit('C')}).`;
                     } else if (dist['D'] >= 4) {
-                        explanation += "With 12+ HCP, no 5-card major, and 4+ Diamonds, you open 1 Diamond.";
+                        explanation += `With 12+ HCP, no 5-card major, and 4+ Diamonds, you open 1 ${renderSuit('D')}.`;
                     } else {
-                        explanation += "With 12+ HCP, no 5-card major, and less than 4 Diamonds, you open 1 Club.";
+                        explanation += `With 12+ HCP, no 5-card major, and less than 4 Diamonds, you open 1 ${renderSuit('C')}.`;
                     }
                 }
                 

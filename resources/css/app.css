@@ -9,3 +9,24 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+.suit-s, .suit-h, .suit-d, .suit-c { 
+    font-size: 1.25em; 
+    line-height: 1; 
+    font-weight: bold; 
+    position: relative;
+    top: -0.08em;
+}
+.suit-s { color: #2563eb; }
+.suit-h { color: #dc2626; }
+.suit-d { color: #ea580c; }
+.suit-c { color: #16a34a; }
+
+@media (prefers-color-scheme: dark) {
+    .suit-s { color: #60a5fa; }
+    .suit-h { color: #f87171; }
+    .suit-d { color: #fb923c; }
+    .suit-c { color: #4ade80; }
+}
+
+
